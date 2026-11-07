@@ -53,7 +53,7 @@ body{background:#f5f7f8}main{max-width:1080px}header{padding-bottom:24px;margin-
 
 /* Phone-first layout */
 main{max-width:560px;padding:calc(22px + env(safe-area-inset-top)) 14px calc(28px + env(safe-area-inset-bottom))}.workspace{grid-template-columns:1fr;gap:18px}header{margin-bottom:22px;padding-bottom:20px}h1{font-size:38px}.subtitle{font-size:17px}.workspace>section,.ref{padding:22px 18px;border-radius:14px}.fields{gap:22px 16px}input{min-height:44px;font-size:20px}label{font-size:14px}.actions{display:grid;grid-template-columns:1fr 1fr}button{min-height:46px;padding:10px 8px}input[type=range]{min-height:48px;touch-action:pan-y}.big{font-size:60px}.row{gap:12px}.row dd{text-align:right;overflow-wrap:anywhere}.ref{margin-top:22px}.eq math{font-size:19px}.eyebrow{font-size:10px}@media(max-width:350px){h1{font-size:33px}.fields{gap:18px 12px}label{font-size:12px}.big{font-size:50px}.workspace>section,.ref{padding:20px 14px}}
-</style></head><body><main>
+.actions{display:block}.actions button{width:100%;background:var(--accent);color:#fff;border-color:var(--accent);font-weight:600}.actions button:hover{background:#163b52}</style></head><body><main>
 <header><p class="eyebrow">Fluid mechanics · Interactive tool</p><h1>Tank Drainage Calculator</h1><p class="subtitle">Gravity-driven flow · Torricelli’s theorem</p></header>
 
 <div class="workspace"><section><h2>Tank &amp; orifice</h2>
@@ -64,7 +64,7 @@ main{max-width:560px;padding:calc(22px + env(safe-area-inset-top)) 14px calc(28p
 <div><label for="cd">Discharge coeff., C<sub>d</sub></label><div class="input"><input id="cd" type="number" inputmode="decimal" value="0.62" min="0" max="1" step="any"></div><small>≈ 0.62 for a sharp-edged hole</small></div>
 <div><label for="gravity">Gravity, g</label><div class="input"><input id="gravity" type="number" inputmode="decimal" value="9.81" min="0" step="any"><span class="unit">m/s²</span></div></div>
 <div><label for="elapsed">Elapsed time, t</label><div class="input"><input id="elapsed" type="number" inputmode="decimal" value="10" min="0" step="any"><span class="unit">min</span></div></div>
-</div><div id="error" class="error" role="alert" hidden></div><div class="actions"><button type="button" id="reset">Reset defaults</button><button type="button" id="finish">Jump to drained</button></div></form><div class="timeline"><label for="scrub">Explore the drainage timeline</label><input id="scrub" type="range" min="0" max="1000" value="0" aria-describedby="scrub-note"><small id="scrub-note">Slide from the initial water level to fully drained.</small></div></section>
+</div><div id="error" class="error" role="alert" hidden></div><div class="actions"><button type="submit" id="calculate">Calculate</button></div></form></section>
 
 <section class="result" aria-live="polite"><h2>Time to drain</h2><div id="results">
 <div class="big"><b id="time" style="font-weight:normal"></b><span>min</span></div>
@@ -88,7 +88,7 @@ main{max-width:560px;padding:calc(22px + env(safe-area-inset-top)) 14px calc(28p
 <div class="eq"><math display="block"><mrow><msqrt><mrow><mi>h</mi><mo>(</mo><mi>t</mi><mo>)</mo></mrow></msqrt><mo>=</mo><msqrt><msub><mi>h</mi><mn>0</mn></msub></msqrt><mo>−</mo><mfrac><mrow><msub><mi>C</mi><mi>d</mi></msub><mi>a</mi></mrow><mi>A</mi></mfrac><msqrt><mfrac><mi>g</mi><mn>2</mn></mfrac></msqrt><mi>t</mi></mrow></math><span class="n">(2)</span></div>
 <div class="eq boxed"><math display="block"><mrow><mi>T</mi><mo>=</mo><mfrac><mi>A</mi><mrow><msub><mi>C</mi><mi>d</mi></msub><mi>a</mi></mrow></mfrac><msqrt><mfrac><mrow><mn>2</mn><msub><mi>h</mi><mn>0</mn></msub></mrow><mi>g</mi></mfrac></msqrt></mrow></math><span class="n">(3)</span></div>
 <p class="note">T is the time for the free surface to reach the orifice centreline, C<sub>d</sub> is the discharge coefficient and g is gravitational acceleration. Assumes A and C<sub>d</sub> stay constant throughout drainage.</p>
-<ul class="assumptions"><li>Vented tank with constant horizontal area; no inflow or back pressure.</li><li>Small outlet relative to tank area; pipe friction and changing discharge coefficient are excluded.</li><li>Head and remaining volume are measured above the outlet centreline. Water below it is excluded.</li></ul></section><p class="footer">SI units · Results update as you type · Idealised engineering estimate</p>
+<ul class="assumptions"><li>Vented tank with constant horizontal area; no inflow or back pressure.</li><li>Small outlet relative to tank area; pipe friction and changing discharge coefficient are excluded.</li><li>Head and remaining volume are measured above the outlet centreline. Water below it is excluded.</li></ul></section><p class="footer">SI units · Tap Calculate to update results · Idealised engineering estimate</p>
 </main>
 <script>
 function drainage(A,d,h,C,g,t){const a=Math.PI*(d/1000)**2/4,T=A/(C*a)*Math.sqrt(2*h/g),level=Math.max(0,Math.sqrt(h)-(C*a/A)*Math.sqrt(g/2)*t)**2;return {a,T,level,Q:C*a*Math.sqrt(2*g*level),Q0:C*a*Math.sqrt(2*g*h)}}
@@ -101,14 +101,10 @@ let r;if(!error){r=drainage(A,d,h,C,g,t*60);if(!Object.values(r).every(Number.is
 $('error').textContent=error;$('error').hidden=!error;$('results').hidden=!!error;if(error)return;
 $('time').textContent=fmt(r.T/60,2);$('seconds').textContent=fmt(r.T,2)+' s · '+fmt(r.T/3600,3)+' h';
 $('level').textContent=fmt(r.level,3)+' m';$('flow').textContent=fmt(r.Q*1000,3)+' L/s';$('initial').textContent=fmt(r.Q0*1000,3)+' L/s';$('hole').textContent=r.a.toExponential(3)+' m²';
-const drained=h>0?100*(1-r.level/h):100;$('percent').textContent=fmt(drained,1)+'% drained';$('progress').value=drained;$('state').textContent=t*60>=r.T?'Drained to outlet':'Draining';$('volume').textContent=fmt(A*r.level*1000,2)+' L';$('remaining').textContent=fmt(Math.max(0,r.T-t*60)/60,2)+' min';$('scrub').disabled=r.T===0;$('scrub').value=r.T>0?Math.min(1000,t*60/r.T*1000):1000;$('scrub').setAttribute('aria-valuetext',fmt(t,2)+' minutes elapsed');
+const drained=h>0?100*(1-r.level/h):100;$('percent').textContent=fmt(drained,1)+'% drained';$('progress').value=drained;$('state').textContent=t*60>=r.T?'Drained to outlet':'Draining';$('volume').textContent=fmt(A*r.level*1000,2)+' L';$('remaining').textContent=fmt(Math.max(0,r.T-t*60)/60,2)+' min';
 $('starthead').textContent=fmt(h)+' m';$('endtime').textContent=fmt(r.T/60,2)+' min';
 const y=f=>110-(h>0?100*(1-f)**2:0),pts=Array.from({length:81},(_,i)=>[4+392*i/80,y(i/80)]),path=pts.map((p,i)=>(i?'L':'M')+p.join(',')).join(' ');
 $('curve').setAttribute('d',path);$('fill').setAttribute('d',path+' L396,110 L4,110 Z');
 const ratio=r.T>0?Math.min(t*60/r.T,1):0;$('marker').setAttribute('cx',4+392*ratio);$('marker').setAttribute('cy',y(ratio));}
-function totalMinutes(){return drainage(...['area','diameter','head','cd','gravity'].map(id=>Number($(id).value)),0).T/60}
-$('scrub').addEventListener('input',()=>{const T=totalMinutes();if(Number.isFinite(T)){$('elapsed').value=Number((T*Number($('scrub').value)/1000).toPrecision(12));calculate()}});
-$('reset').addEventListener('click',()=>{$('form').reset();calculate()});
-$('finish').addEventListener('click',()=>{const T=totalMinutes();if(Number.isFinite(T)&&T>=0){$('elapsed').value=T;calculate()}});
-$('form').addEventListener('submit',calculate);$('form').addEventListener('input',calculate);calculate();
+$('form').addEventListener('submit',calculate);$('results').hidden=true;
 </script></body></html>
